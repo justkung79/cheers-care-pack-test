@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CHEERS Care Pack - LIFF Test</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5faf7;
+      color: #263b32;
+      padding: 30px 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 420px;
+      margin: auto;
+    }
+    #status { line-height: 1.7; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>CHEERS Care Pack</h2>
+    <p>LINE LIFF Connection Test</p>
+    <p id="status">กำลังเริ่มต้น...</p>
+  </div>
+
+  <script>
+    const LIFF_ID = "2012323818-iQS10bK0";
+    const statusEl = document.getElementById("status");
+
+    async function testLIFF() {
+      if (typeof liff === "undefined") {
+        statusEl.textContent = "ไม่พบ LIFF SDK";
+        return;
+      }
+
+      statusEl.textContent = "SDK โหลดแล้ว กำลังเชื่อมต่อ LIFF...";
+
+      const timer = setTimeout(() => {
+        statusEl.textContent = "LIFF ยังไม่ตอบกลับภายใน 10 วินาที";
+      }, 10000);
+
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        clearTimeout(timer);
+
+        if (!liff.isLoggedIn()) {
+          statusEl.textContent = "LIFF เริ่มต้นสำเร็จ แต่ยังไม่ได้เข้าสู่ระบบ LINE";
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        statusEl.textContent =
+          "เชื่อมต่อ LINE สำเร็จ! ชื่อ: " + profile.displayName;
+      } catch (error) {
+        clearTimeout(timer);
+        statusEl.textContent =
+          "เกิดข้อผิดพลาด: " + (error.message || String(error));
+      }
+    }
+
+    testLIFF();
+  </script>
+</body>
+</html>
