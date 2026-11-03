@@ -71,7 +71,7 @@
 
         if (!liff.isLoggedIn()) {
   statusEl.textContent = "กำลังเข้าสู่ระบบ LINE...";
-  liff.login({ redirectUri: window.location.href });
+  liff.login();
   return;
 }
         const profile = await liff.getProfile();
