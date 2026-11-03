@@ -70,10 +70,10 @@
         clearTimeout(timer);
 
         if (!liff.isLoggedIn()) {
-          statusEl.textContent = 'ยังไม่ได้เข้าสู่ระบบ LINE';
-          return;
-        }
-
+  statusEl.textContent = "กำลังเข้าสู่ระบบ LINE...";
+  liff.login({ redirectUri: window.location.href });
+  return;
+}
         const profile = await liff.getProfile();
         statusEl.textContent =
           'เชื่อมต่อ LINE สำเร็จ! ชื่อ: ' + profile.displayName;
