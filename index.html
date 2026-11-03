@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -20,7 +19,19 @@
       max-width: 420px;
       margin: auto;
     }
-    #status { line-height: 1.7; overflow-wrap: anywhere; }
+    #status {
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+    button {
+      background: #276749;
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -28,22 +39,30 @@
     <h2>CHEERS Care Pack</h2>
     <p>LINE LIFF Connection Test</p>
     <p id="status">กำลังเริ่มต้น...</p>
+    <button id="saveBtn" hidden>ทดสอบบันทึกข้อมูล</button>
+    <p id="saveStatus"></p>
   </div>
+
+  <iframe name="saveFrame" style="display:none"></iframe>
 
   <script>
     const LIFF_ID = '2012323818-iQS10bKO';
-    const statusEl = document.getElementById("status");
+
+    // Replace with the Backend Web app URL ending in /exec
+    const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwWO8scFTsn3g6G3651wSmTZlypvPfdvYJq742lHXRIS6IhWrwaUblCsinpIkq2WhfU/exec';
+
+    const statusEl = document.getElementById('status');
+    const saveBtn = document.getElementById('saveBtn');
+    const saveStatus = document.getElementById('saveStatus');
 
     async function testLIFF() {
-      if (typeof liff === "undefined") {
-        statusEl.textContent = "ไม่พบ LIFF SDK";
+      if (typeof liff === 'undefined') {
+        statusEl.textContent = 'ไม่พบ LIFF SDK';
         return;
       }
 
-      statusEl.textContent = "SDK โหลดแล้ว กำลังเชื่อมต่อ LIFF...";
-
       const timer = setTimeout(() => {
-        statusEl.textContent = "LIFF ยังไม่ตอบกลับภายใน 10 วินาที";
+        statusEl.textContent = 'LIFF ยังไม่ตอบกลับภายใน 10 วินาที';
       }, 10000);
 
       try {
@@ -51,19 +70,53 @@
         clearTimeout(timer);
 
         if (!liff.isLoggedIn()) {
-          statusEl.textContent = "LIFF เริ่มต้นสำเร็จ แต่ยังไม่ได้เข้าสู่ระบบ LINE";
+          statusEl.textContent = 'ยังไม่ได้เข้าสู่ระบบ LINE';
           return;
         }
 
         const profile = await liff.getProfile();
         statusEl.textContent =
-          "เชื่อมต่อ LINE สำเร็จ! ชื่อ: " + profile.displayName;
+          'เชื่อมต่อ LINE สำเร็จ! ชื่อ: ' + profile.displayName;
+
+        saveBtn.hidden = false;
       } catch (error) {
         clearTimeout(timer);
         statusEl.textContent =
-          "เกิดข้อผิดพลาด: " + (error.message || String(error));
+          'เกิดข้อผิดพลาด: ' + (error.message || String(error));
       }
     }
+
+    saveBtn.addEventListener('click', () => {
+      const idToken = liff.getIDToken();
+
+      if (!idToken) {
+        saveStatus.textContent = 'ไม่พบ LINE ID token';
+        return;
+      }
+
+      if (!BACKEND_URL.startsWith('https://script.google.com/')) {
+        saveStatus.textContent = 'ยังไม่ได้ตั้งค่า Backend URL';
+        return;
+      }
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = BACKEND_URL;
+      form.target = 'saveFrame';
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'idToken';
+      input.value = idToken;
+
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+      form.remove();
+
+      saveStatus.textContent =
+        'ส่งคำขอแล้ว กรุณาตรวจสอบ Google Sheets';
+    });
 
     testLIFF();
   </script>
