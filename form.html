@@ -1,176 +1,61 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1">
-  <title>CHEERS Care Pack</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: #f4f8f7;
-      font-family: Arial, sans-serif;
-      color: #243b36;
-    }
-    header {
-      background: #087e70;
-      color: white;
-      padding: 26px 20px;
-    }
-    header h1 { margin: 0 0 6px; }
-    header p { margin: 0; opacity: .9; }
-    main {
-      max-width: 540px;
-      margin: 20px auto;
-      padding: 0 16px 40px;
-    }
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 3px 12px #0000000a;
-    }
-    h2 { font-size: 19px; margin-top: 0; }
-    .option {
-      display: block;
-      padding: 16px;
-      margin: 12px 0;
-      border: 1px solid #d8e5e1;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .option:has(input:checked) {
-      border: 2px solid #087e70;
-      background: #eef9f5;
-    }
-    input[type=radio] {
-      accent-color: #087e70;
-      margin-right: 8px;
-    }
-    .details {
-      margin-top: 20px;
-      background: #f5faf8;
-      padding: 16px;
-      border-radius: 12px;
-    }
-    .details li { margin-bottom: 8px; }
-    .note { font-size: 13px; color: #60736e; }
-    button {
-      width: 100%;
-      margin-top: 22px;
-      padding: 15px;
-      border: 0;
-      border-radius: 12px;
-      background: #087e70;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHEERS Care Pack — Form Preview</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f8f7;font-family:Arial,'Noto Sans Thai',sans-serif;color:#243b36;line-height:1.55}header{background:#087e70;color:#fff;padding:25px 20px}header .wrap{max-width:540px;margin:auto}h1{margin:0;font-size:27px}header p{margin:3px 0 0}main{max-width:540px;margin:22px auto;padding:0 16px 45px}.card{background:white;border-radius:17px;padding:23px;box-shadow:0 3px 12px #0000000a}h2{font-size:20px;margin:0 0 12px}p{margin:8px 0 14px}.option{display:block;padding:16px;margin:12px 0;border:1px solid #d8e5e1;border-radius:12px;cursor:pointer}.option:has(input:checked){border:2px solid #087e70;background:#eef9f5}input[type=radio]{accent-color:#087e70;margin-right:8px}.details{margin-top:18px;background:#f5faf8;padding:16px;border-radius:12px}.details ul{padding-left:22px}.details li{margin-bottom:7px}.note{font-size:13px;color:#60736e}.step{font-size:13px;color:#087e70;font-weight:bold;margin-bottom:12px}.item{border-bottom:1px solid #e7eeeb;padding:13px 0;display:flex;justify-content:space-between;align-items:center;gap:12px}.item:last-child{border-bottom:0}.item-name{font-weight:600;font-size:14px}.item-limit{font-size:12px;color:#657670}.item input{width:90px;min-width:75px;border:1px solid #b8cbc5;border-radius:9px;padding:11px;font-size:16px;text-align:center}.item input:focus{outline:2px solid #087e70}.actions{display:flex;gap:10px;margin-top:20px}button{width:100%;padding:14px;border:0;border-radius:12px;background:#087e70;color:#fff;font-size:16px;font-weight:bold;cursor:pointer}button.secondary{background:#e7efec;color:#245348}.error{color:#a52a2a;font-size:13px;margin:10px 0}.hidden{display:none!important}.preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5faf8;border-radius:12px;padding:16px;font-size:14px}.tag{display:inline-block;background:#e4f4eb;color:#116a4c;padding:4px 9px;border-radius:20px;font-size:12px}
+</style>
 </head>
 <body>
-  <header>
-    <h1>CHEERS Care Pack 💚</h1>
-    <p>ชุดอุปกรณ์ลดอันตราย</p>
-  </header>
-
-  <main>
-    <div class="card">
-      <h2>เลือกรูปแบบ Care Pack</h2>
-      <p>คุณต้องการรับ Care Pack รูปแบบใด?</p>
-
-      <label class="option">
-        <input type="radio" name="pack"
-               value="standard" checked>
-        ชุดมาตรฐาน
-      </label>
-
-      <label class="option">
-        <input type="radio" name="pack"
-               value="custom">
-        เลือกอุปกรณ์เอง
-      </label>
-
-      <label class="option">
-        <input type="radio" name="pack"
-               value="standard_extra">
-        ชุดมาตรฐาน + อุปกรณ์เพิ่มเติม
-      </label>
-
-      <div id="details" class="details"></div>
-
-      <button type="button" id="nextBtn">
-        ถัดไป →
-      </button>
-      <p class="note">
-        หน้านี้เป็นเวอร์ชันทดสอบ
-        ยังไม่มีการส่งหรือบันทึกข้อมูล
-      </p>
-    </div>
-  </main>
-
-  <script>
-    const standardItems = [
-      "เข็ม 2 ชิ้น",
-      "สายรัดห้ามเลือด 1 ชิ้น",
-      "พลาสเตอร์แปะแผล 5 ชิ้น",
-      "แผ่นแอลกอฮอล์ 4 ชิ้น",
-      "Sterile water for injection 3 ชิ้น",
-      "สารหล่อลื่น 3 ชิ้น",
-      "ถุงยางอนามัย 3 ชิ้น",
-      "ไม้แคะหูสแตนเลส 1 ชิ้น",
-      "กล่องใส่แว่น 1 กล่อง",
-      "สำลีก้อน 10 ชิ้น",
-      "กล่องใส่เข็มขนาดเล็ก 1 กล่อง",
-      "ลิปบาล์ม 1 แท่ง"
-    ];
-
-    function renderDetails() {
-      const selected =
-        document.querySelector(
-          'input[name="pack"]:checked'
-        ).value;
-
-      const details = document.getElementById("details");
-
-      if (selected === "custom") {
-        details.innerHTML = `
-          <strong>เลือกอุปกรณ์เอง</strong>
-          <p>หน้าถัดไปจะแสดงอุปกรณ์ทั้ง 22 รายการ
-          พร้อมช่องระบุจำนวนที่ต้องการ</p>
-        `;
-        return;
-      }
-
-      details.innerHTML = `
-        <strong>รายการในชุดมาตรฐาน</strong>
-        <ul>
-          ${standardItems.map(item =>
-            `<li>${item}</li>`
-          ).join("")}
-        </ul>
-        ${selected === "standard_extra"
-          ? "<p>คุณสามารถเลือกอุปกรณ์เพิ่มเติมได้ในหน้าถัดไป</p>"
-          : "<p>ไม่ต้องระบุจำนวนอุปกรณ์ทีละรายการ</p>"
-        }
-      `;
-    }
-
-    document.querySelectorAll(
-      'input[name="pack"]'
-    ).forEach(input => {
-      input.addEventListener("change", renderDetails);
-    });
-
-    document.getElementById("nextBtn")
-      .addEventListener("click", () => {
-        alert("ขั้นถัดไป: รายการอุปกรณ์และจำนวน");
-      });
-
-    renderDetails();
-  </script>
+<header><div class="wrap"><h1>CHEERS Care Pack 💚</h1><p>ชุดอุปกรณ์ลดอันตราย</p></div></header>
+<main><div class="card">
+<section id="step1"><div class="step">ขั้นที่ 1 จาก 2 · เลือกรูปแบบ</div><h2>เลือกรูปแบบ Care Pack</h2><p>คุณต้องการรับ Care Pack รูปแบบใด?</p>
+<label class="option"><input type="radio" name="pack" value="standard" checked>ชุดมาตรฐาน</label>
+<label class="option"><input type="radio" name="pack" value="custom">เลือกอุปกรณ์เอง</label>
+<label class="option"><input type="radio" name="pack" value="standard_extra">ชุดมาตรฐาน + อุปกรณ์เพิ่มเติม</label>
+<div id="details" class="details"></div><div class="actions"><button type="button" id="nextBtn">ถัดไป →</button></div></section>
+<section id="step2" class="hidden"><div class="step">ขั้นที่ 2 จาก 2 · เลือกอุปกรณ์</div><h2 id="itemsTitle">เลือกอุปกรณ์</h2><p class="note">กรอกจำนวนที่ต้องการ หากไม่ต้องการรายการใดให้เว้นว่างหรือใส่ 0</p><div id="itemList"></div><div id="error" class="error" role="alert"></div><div class="actions"><button type="button" class="secondary" id="backBtn">← ย้อนกลับ</button><button type="button" id="reviewBtn">ตรวจสอบรายการ →</button></div></section>
+<section id="step3" class="hidden"><div class="step">สรุปการเลือก · โหมดทดสอบ</div><h2>ตรวจสอบรายการ</h2><span class="tag">ยังไม่บันทึกคำขอ</span><div id="summary" class="preview" style="margin-top:15px"></div><div class="actions"><button type="button" class="secondary" id="editBtn">← แก้ไข</button><button type="button" id="finishBtn">เสร็จสิ้นการทดสอบ</button></div></section>
+<p class="note" style="margin-top:20px">เวอร์ชันทดสอบ: ไม่ส่งข้อมูลไป LINE, Apps Script หรือ Google Sheets และยังไม่รับคำขอจริง</p>
+</div></main>
+<script>
+const standardItems=["เข็ม 2 ชิ้น","สายรัดห้ามเลือด 1 ชิ้น","พลาสเตอร์แปะแผล 5 ชิ้น","แผ่นแอลกอฮอล์ 4 ชิ้น","Sterile water for injection 3 ชิ้น","สารหล่อลื่น 3 ชิ้น","ถุงยางอนามัย 3 ชิ้น","ไม้แคะหูสแตนเลส 1 ชิ้น","กล่องใส่แว่น 1 กล่อง","สำลีก้อน 10 ชิ้น","กล่องใส่เข็มขนาดเล็ก 1 กล่อง","ลิปบาล์ม 1 แท่ง"];
+// null means no quantity ceiling. Current agreed rules override older footnotes in the draft.
+const items=[
+{name:"กระบอกฉีดยา 1 mL หัวเข็ม 27G × 13 mm",max:null},
+{name:"กระบอกฉีดยา 1 mL หัวเข็ม 29G × 13 mm",max:null},
+{name:"กระบอกฉีดยา 1 mL หัวเข็ม 31G × 6 mm",max:null},
+{name:"น้ำเกลือ 5 mL",max:null},
+{name:"น้ำปราศจากเชื้อสำหรับฉีด 5 mL (Sterile Water)",max:null},
+{name:"สายยางห้ามเลือดแบบแบน",max:3,unit:"เส้น"},
+{name:"แผ่นแอลกอฮอล์ (Alcohol pad)",max:60,unit:"แผ่น"},
+{name:"สำลีก้อน",max:60,unit:"ก้อน"},
+{name:"พลาสเตอร์แปะแผล",max:60,unit:"ชิ้น"},
+{name:"กระบอกทิ้งเข็ม",max:2,unit:"ชิ้น"},
+{name:"ถุงมือยาง",max:10,unit:"คู่"},
+{name:"ยาสีฟัน 12 กรัม",max:2,unit:"ซอง"},
+{name:"แปรงสีฟัน",max:1,unit:"ด้าม"},
+{name:"Reparil gel 10 กรัม",max:1,unit:"หลอด"},
+{name:"โจ๋",max:1,unit:"อัน"},
+{name:"หลอดพลาสติกแบบขด",max:1,unit:"ชิ้น"},
+{name:"ลิปบาล์ม",max:1,unit:"ตลับ"},
+{name:"น้ำเกลือล้างแผล 100 mL",max:1,unit:"ขวด"},
+{name:"ชุดอุปกรณ์ทำแผล",max:1,unit:"ชุด"},
+{name:"น้ำยาบ้วนปาก 95 mL",max:1,unit:"ขวด"},
+{name:"ถุงซิปล็อกสีน้ำตาลเข้ม 15 × 23 ซม.",max:1,unit:"ซอง"},
+{name:"ชุดตรวจเอชไอวีด้วยตนเอง",max:1,unit:"ชุด"}
+];
+const values=Array(items.length).fill(0);
+const el=id=>document.getElementById(id);
+const selectedPack=()=>document.querySelector('input[name="pack"]:checked').value;
+function show(id){["step1","step2","step3"].forEach(s=>el(s).classList.toggle("hidden",s!==id));window.scrollTo(0,0)}
+function renderDetails(){const p=selectedPack();if(p==="custom"){el("details").innerHTML="<strong>เลือกอุปกรณ์เอง</strong><p>หน้าถัดไปแสดงอุปกรณ์ 22 รายการ พร้อมช่องระบุจำนวน</p>";return}el("details").innerHTML="<strong>รายการในชุดมาตรฐาน</strong><ul>"+standardItems.map(x=>"<li>"+x+"</li>").join("")+"</ul>"+(p==="standard_extra"?"<p>หน้าถัดไปเลือกอุปกรณ์เพิ่มเติมได้ โดยนับเพดานเฉพาะจำนวนที่ขอเพิ่ม</p>":"<p>ไม่ต้องกรอกจำนวนทีละรายการ</p>")}
+function renderItems(){el("itemsTitle").textContent=selectedPack()==="custom"?"เลือกอุปกรณ์เอง":"เลือกอุปกรณ์เพิ่มเติม";el("itemList").replaceChildren();items.forEach((item,i)=>{const row=document.createElement("div");row.className="item";const info=document.createElement("div");const name=document.createElement("div");name.className="item-name";name.textContent=item.name;const limit=document.createElement("div");limit.className="item-limit";limit.textContent=item.max===null?"ไม่จำกัดจำนวน":"สูงสุด "+item.max+" "+item.unit;info.append(name,limit);const input=document.createElement("input");input.type="number";input.min="0";input.step="1";input.inputMode="numeric";input.setAttribute("aria-label","จำนวน "+item.name);if(item.max!==null)input.max=String(item.max);input.value=values[i]||"";input.placeholder="0";input.addEventListener("input",()=>{values[i]=input.value;el("error").textContent=""});row.append(info,input);el("itemList").append(row)})}
+function validate(){for(let i=0;i<items.length;i++){const raw=values[i];if(raw===""||raw===0)continue;const n=Number(raw);if(!Number.isSafeInteger(n)||n<0){return "กรุณากรอกจำนวนเต็มตั้งแต่ 0 ขึ้นไป: "+items[i].name}if(items[i].max!==null&&n>items[i].max){return items[i].name+" ขอได้สูงสุด "+items[i].max+" "+items[i].unit}}return ""}
+function summary(){const p=selectedPack();const label={standard:"ชุดมาตรฐาน",custom:"เลือกอุปกรณ์เอง",standard_extra:"ชุดมาตรฐาน + อุปกรณ์เพิ่มเติม"}[p];let lines=["รูปแบบ: "+label];if(p!=="custom")lines.push("", "ชุดมาตรฐาน: 12 รายการตามรายการที่แสดงในขั้นแรก");if(p!=="standard"){const chosen=items.map((x,i)=>({name:x.name,n:Number(values[i]||0)})).filter(x=>x.n>0);lines.push("",p==="custom"?"อุปกรณ์ที่เลือก:":"อุปกรณ์เพิ่มเติม:");lines.push(...(chosen.length?chosen.map(x=>"• "+x.name+" — "+x.n):["ยังไม่ได้เลือกอุปกรณ์"]))}el("summary").textContent=lines.join("\n")}
+document.querySelectorAll('input[name="pack"]').forEach(r=>r.addEventListener("change",renderDetails));el("nextBtn").addEventListener("click",()=>{if(selectedPack()==="standard"){summary();show("step3")}else{renderItems();show("step2")}});el("backBtn").addEventListener("click",()=>show("step1"));el("reviewBtn").addEventListener("click",()=>{const e=validate();if(e){el("error").textContent=e;return}if(!values.some(v=>Number(v)>0)){el("error").textContent="กรุณาเลือกอุปกรณ์อย่างน้อย 1 รายการ";return}summary();show("step3")});el("editBtn").addEventListener("click",()=>{if(selectedPack()==="standard")show("step1");else{renderItems();show("step2")}});el("finishBtn").addEventListener("click",()=>{alert("ทดสอบเรียบร้อย! ยังไม่มีการส่งคำขอจริง");show("step1")});renderDetails();
+</script>
 </body>
 </html>
