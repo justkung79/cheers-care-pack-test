@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CHEERS Care Pack — Form Preview</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f4f8f7;font-family:Arial,'Noto Sans Thai',sans-serif;color:#243b36;line-height:1.55}header{background:#087e70;color:#fff;padding:25px 20px}header .wrap{max-width:540px;margin:auto}h1{margin:0;font-size:27px}header p{margin:3px 0 0}main{max-width:540px;margin:22px auto;padding:0 16px 45px}.card{background:white;border-radius:17px;padding:23px;box-shadow:0 3px 12px #0000000a}h2{font-size:20px;margin:0 0 12px}p{margin:8px 0 14px}.option{display:block;padding:16px;margin:12px 0;border:1px solid #d8e5e1;border-radius:12px;cursor:pointer}.option:has(input:checked){border:2px solid #087e70;background:#eef9f5}input[type=radio]{accent-color:#087e70;margin-right:8px}.details{margin-top:18px;background:#f5faf8;padding:16px;border-radius:12px}.details ul{padding-left:22px}.details li{margin-bottom:7px}.note{font-size:13px;color:#60736e}.step{font-size:13px;color:#087e70;font-weight:bold;margin-bottom:12px}.item{border-bottom:1px solid #e7eeeb;padding:13px 0;display:flex;justify-content:space-between;align-items:center;gap:12px}.item:last-child{border-bottom:0}.item-name{font-weight:600;font-size:14px}.item-limit{font-size:12px;color:#657670}.item input{width:90px;min-width:75px;border:1px solid #b8cbc5;border-radius:9px;padding:11px;font-size:16px;text-align:center}.item input:focus{outline:2px solid #087e70}.actions{display:flex;gap:10px;margin-top:20px}button{width:100%;padding:14px;border:0;border-radius:12px;background:#087e70;color:#fff;font-size:16px;font-weight:bold;cursor:pointer}button.secondary{background:#e7efec;color:#245348}.error{color:#a52a2a;font-size:13px;margin:10px 0}.hidden{display:none!important}.preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5faf8;border-radius:12px;padding:16px;font-size:14px}.tag{display:inline-block;background:#e4f4eb;color:#116a4c;padding:4px 9px;border-radius:20px;font-size:12px}
+*{box-sizing:border-box}body{margin:0;background:#f4f8f7;font-family:Arial,'Noto Sans Thai',sans-serif;color:#243b36;line-height:1.55}header{background:#087e70;color:#fff;padding:25px 20px}header .wrap{max-width:540px;margin:auto}h1{margin:0;font-size:27px}header p{margin:3px 0 0}main{max-width:540px;margin:22px auto;padding:0 16px 45px}.card{background:white;border-radius:17px;padding:23px;box-shadow:0 3px 12px #0000000a}h2{font-size:20px;margin:0 0 12px}p{margin:8px 0 14px}.option{display:block;padding:16px;margin:12px 0;border:1px solid #d8e5e1;border-radius:12px;cursor:pointer}.option:has(input:checked){border:2px solid #087e70;background:#eef9f5}input[type=radio]{accent-color:#087e70;margin-right:8px}.details{margin-top:18px;background:#f5faf8;padding:16px;border-radius:12px}.details ul{padding-left:22px}.details li{margin-bottom:7px}.note{font-size:13px;color:#60736e}.step{font-size:13px;color:#087e70;font-weight:bold;margin-bottom:12px}.item{border-bottom:1px solid #e7eeeb;padding:13px 0;display:flex;justify-content:space-between;align-items:center;gap:12px}.item:last-child{border-bottom:0}.item-name{font-weight:600;font-size:14px}.item-limit{font-size:12px;color:#657670}.item input{width:90px;min-width:75px;border:1px solid #b8cbc5;border-radius:9px;padding:11px;font-size:16px;text-align:center}.item input:focus{outline:2px solid #087e70}.item input.invalid{border:2px solid #b3261e;background:#fff7f6}.item input.invalid:focus{outline:2px solid #b3261e}.item-info{flex:1;min-width:0}.item-error{font-size:12px;color:#b3261e;margin-top:5px;min-height:0}.item-error:empty{display:none}.actions{display:flex;gap:10px;margin-top:20px}button{width:100%;padding:14px;border:0;border-radius:12px;background:#087e70;color:#fff;font-size:16px;font-weight:bold;cursor:pointer}button.secondary{background:#e7efec;color:#245348}.error{color:#a52a2a;font-size:13px;margin:10px 0}.hidden{display:none!important}.preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5faf8;border-radius:12px;padding:16px;font-size:14px}.tag{display:inline-block;background:#e4f4eb;color:#116a4c;padding:4px 9px;border-radius:20px;font-size:12px}
 </style>
 </head>
 <body>
@@ -52,8 +52,51 @@ const el=id=>document.getElementById(id);
 const selectedPack=()=>document.querySelector('input[name="pack"]:checked').value;
 function show(id){["step1","step2","step3"].forEach(s=>el(s).classList.toggle("hidden",s!==id));window.scrollTo(0,0)}
 function renderDetails(){const p=selectedPack();if(p==="custom"){el("details").innerHTML="<strong>เลือกอุปกรณ์เอง</strong><p>หน้าถัดไปแสดงอุปกรณ์ 22 รายการ พร้อมช่องระบุจำนวน</p>";return}el("details").innerHTML="<strong>รายการในชุดมาตรฐาน</strong><ul>"+standardItems.map(x=>"<li>"+x+"</li>").join("")+"</ul>"+(p==="standard_extra"?"<p>หน้าถัดไปเลือกอุปกรณ์เพิ่มเติมได้ โดยนับเพดานเฉพาะจำนวนที่ขอเพิ่ม</p>":"<p>ไม่ต้องกรอกจำนวนทีละรายการ</p>")}
-function renderItems(){el("itemsTitle").textContent=selectedPack()==="custom"?"เลือกอุปกรณ์เอง":"เลือกอุปกรณ์เพิ่มเติม";el("itemList").replaceChildren();items.forEach((item,i)=>{const row=document.createElement("div");row.className="item";const info=document.createElement("div");const name=document.createElement("div");name.className="item-name";name.textContent=item.name;const limit=document.createElement("div");limit.className="item-limit";limit.textContent=item.max===null?"ไม่จำกัดจำนวน":"สูงสุด "+item.max+" "+item.unit;info.append(name,limit);const input=document.createElement("input");input.type="number";input.min="0";input.step="1";input.inputMode="numeric";input.setAttribute("aria-label","จำนวน "+item.name);if(item.max!==null)input.max=String(item.max);input.value=values[i]||"";input.placeholder="0";input.addEventListener("input",()=>{values[i]=input.value;el("error").textContent=""});row.append(info,input);el("itemList").append(row)})}
-function validate(){for(let i=0;i<items.length;i++){const raw=values[i];if(raw===""||raw===0)continue;const n=Number(raw);if(!Number.isSafeInteger(n)||n<0){return "กรุณากรอกจำนวนเต็มตั้งแต่ 0 ขึ้นไป: "+items[i].name}if(items[i].max!==null&&n>items[i].max){return items[i].name+" ขอได้สูงสุด "+items[i].max+" "+items[i].unit}}return ""}
+function checkQuantity(item,raw){
+  if(raw==="")return "";
+  const n=Number(raw);
+  if(!Number.isSafeInteger(n)||n<0)return "กรุณากรอกจำนวนเต็มตั้งแต่ 0 ขึ้นไป";
+  if(item.max!==null&&n>item.max)return "ขอได้สูงสุด "+item.max+" "+item.unit;
+  return "";
+}
+function renderItems(){
+  el("itemsTitle").textContent=selectedPack()==="custom"?"เลือกอุปกรณ์เอง":"เลือกอุปกรณ์เพิ่มเติม";
+  el("itemList").replaceChildren();el("error").textContent="";
+  items.forEach((item,i)=>{
+    const row=document.createElement("div");row.className="item";
+    const info=document.createElement("div");info.className="item-info";
+    const name=document.createElement("div");name.className="item-name";name.textContent=item.name;
+    const limit=document.createElement("div");limit.className="item-limit";
+    limit.textContent=item.max===null?"ไม่จำกัดจำนวน":"สูงสุด "+item.max+" "+item.unit;
+    const warning=document.createElement("div");warning.className="item-error";warning.id="warning-"+i;
+    warning.setAttribute("aria-live","polite");
+    info.append(name,limit,warning);
+    const input=document.createElement("input");input.type="number";input.min="0";input.step="1";
+    input.inputMode="numeric";input.setAttribute("aria-label","จำนวน "+item.name);
+    input.setAttribute("aria-describedby",warning.id);
+    if(item.max!==null)input.max=String(item.max);
+    input.value=values[i]||"";input.placeholder="0";
+    function updateWarning(){
+      const msg=checkQuantity(item,input.value);
+      warning.textContent=msg;input.classList.toggle("invalid",!!msg);
+      input.setAttribute("aria-invalid",msg?"true":"false");
+    }
+    input.addEventListener("input",()=>{values[i]=input.value;updateWarning();el("error").textContent=""});
+    input.addEventListener("change",updateWarning);
+    row.append(info,input);el("itemList").append(row);updateWarning();
+  });
+}
+function validate(){
+  for(let i=0;i<items.length;i++){
+    const msg=checkQuantity(items[i],String(values[i]));
+    if(msg){
+      const input=el("itemList").querySelectorAll("input")[i];
+      if(input){input.focus();input.scrollIntoView({block:"center",behavior:"smooth"})}
+      return items[i].name+": "+msg;
+    }
+  }
+  return "";
+}
 function summary(){const p=selectedPack();const label={standard:"ชุดมาตรฐาน",custom:"เลือกอุปกรณ์เอง",standard_extra:"ชุดมาตรฐาน + อุปกรณ์เพิ่มเติม"}[p];let lines=["รูปแบบ: "+label];if(p!=="custom")lines.push("", "ชุดมาตรฐาน: 12 รายการตามรายการที่แสดงในขั้นแรก");if(p!=="standard"){const chosen=items.map((x,i)=>({name:x.name,n:Number(values[i]||0)})).filter(x=>x.n>0);lines.push("",p==="custom"?"อุปกรณ์ที่เลือก:":"อุปกรณ์เพิ่มเติม:");lines.push(...(chosen.length?chosen.map(x=>"• "+x.name+" — "+x.n):["ยังไม่ได้เลือกอุปกรณ์"]))}el("summary").textContent=lines.join("\n")}
 document.querySelectorAll('input[name="pack"]').forEach(r=>r.addEventListener("change",renderDetails));el("nextBtn").addEventListener("click",()=>{if(selectedPack()==="standard"){summary();show("step3")}else{renderItems();show("step2")}});el("backBtn").addEventListener("click",()=>show("step1"));el("reviewBtn").addEventListener("click",()=>{const e=validate();if(e){el("error").textContent=e;return}if(!values.some(v=>Number(v)>0)){el("error").textContent="กรุณาเลือกอุปกรณ์อย่างน้อย 1 รายการ";return}summary();show("step3")});el("editBtn").addEventListener("click",()=>{if(selectedPack()==="standard")show("step1");else{renderItems();show("step2")}});el("finishBtn").addEventListener("click",()=>{alert("ทดสอบเรียบร้อย! ยังไม่มีการส่งคำขอจริง");show("step1")});renderDetails();
 </script>
