@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>CHEERS Care Pack</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f4f8f7;
+      font-family: Arial, sans-serif;
+      color: #243b36;
+    }
+    header {
+      background: #087e70;
+      color: white;
+      padding: 26px 20px;
+    }
+    header h1 { margin: 0 0 6px; }
+    header p { margin: 0; opacity: .9; }
+    main {
+      max-width: 540px;
+      margin: 20px auto;
+      padding: 0 16px 40px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 3px 12px #0000000a;
+    }
+    h2 { font-size: 19px; margin-top: 0; }
+    .option {
+      display: block;
+      padding: 16px;
+      margin: 12px 0;
+      border: 1px solid #d8e5e1;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .option:has(input:checked) {
+      border: 2px solid #087e70;
+      background: #eef9f5;
+    }
+    input[type=radio] {
+      accent-color: #087e70;
+      margin-right: 8px;
+    }
+    .details {
+      margin-top: 20px;
+      background: #f5faf8;
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .details li { margin-bottom: 8px; }
+    .note { font-size: 13px; color: #60736e; }
+    button {
+      width: 100%;
+      margin-top: 22px;
+      padding: 15px;
+      border: 0;
+      border-radius: 12px;
+      background: #087e70;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CHEERS Care Pack 💚</h1>
+    <p>ชุดอุปกรณ์ลดอันตราย</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>เลือกรูปแบบ Care Pack</h2>
+      <p>คุณต้องการรับ Care Pack รูปแบบใด?</p>
+
+      <label class="option">
+        <input type="radio" name="pack"
+               value="standard" checked>
+        ชุดมาตรฐาน
+      </label>
+
+      <label class="option">
+        <input type="radio" name="pack"
+               value="custom">
+        เลือกอุปกรณ์เอง
+      </label>
+
+      <label class="option">
+        <input type="radio" name="pack"
+               value="standard_extra">
+        ชุดมาตรฐาน + อุปกรณ์เพิ่มเติม
+      </label>
+
+      <div id="details" class="details"></div>
+
+      <button type="button" id="nextBtn">
+        ถัดไป →
+      </button>
+      <p class="note">
+        หน้านี้เป็นเวอร์ชันทดสอบ
+        ยังไม่มีการส่งหรือบันทึกข้อมูล
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const standardItems = [
+      "เข็ม 2 ชิ้น",
+      "สายรัดห้ามเลือด 1 ชิ้น",
+      "พลาสเตอร์แปะแผล 5 ชิ้น",
+      "แผ่นแอลกอฮอล์ 4 ชิ้น",
+      "Sterile water for injection 3 ชิ้น",
+      "สารหล่อลื่น 3 ชิ้น",
+      "ถุงยางอนามัย 3 ชิ้น",
+      "ไม้แคะหูสแตนเลส 1 ชิ้น",
+      "กล่องใส่แว่น 1 กล่อง",
+      "สำลีก้อน 10 ชิ้น",
+      "กล่องใส่เข็มขนาดเล็ก 1 กล่อง",
+      "ลิปบาล์ม 1 แท่ง"
+    ];
+
+    function renderDetails() {
+      const selected =
+        document.querySelector(
+          'input[name="pack"]:checked'
+        ).value;
+
+      const details = document.getElementById("details");
+
+      if (selected === "custom") {
+        details.innerHTML = `
+          <strong>เลือกอุปกรณ์เอง</strong>
+          <p>หน้าถัดไปจะแสดงอุปกรณ์ทั้ง 22 รายการ
+          พร้อมช่องระบุจำนวนที่ต้องการ</p>
+        `;
+        return;
+      }
+
+      details.innerHTML = `
+        <strong>รายการในชุดมาตรฐาน</strong>
+        <ul>
+          ${standardItems.map(item =>
+            `<li>${item}</li>`
+          ).join("")}
+        </ul>
+        ${selected === "standard_extra"
+          ? "<p>คุณสามารถเลือกอุปกรณ์เพิ่มเติมได้ในหน้าถัดไป</p>"
+          : "<p>ไม่ต้องระบุจำนวนอุปกรณ์ทีละรายการ</p>"
+        }
+      `;
+    }
+
+    document.querySelectorAll(
+      'input[name="pack"]'
+    ).forEach(input => {
+      input.addEventListener("change", renderDetails);
+    });
+
+    document.getElementById("nextBtn")
+      .addEventListener("click", () => {
+        alert("ขั้นถัดไป: รายการอุปกรณ์และจำนวน");
+      });
+
+    renderDetails();
+  </script>
+</body>
+</html>
