@@ -15,7 +15,7 @@
 <p class="note">คำชี้แจง: ท่านสามารถระบุจำนวนอุปกรณ์ที่ต้องการให้สอดคล้องกับวิธีการใช้สารของท่านในระยะเวลา 1 เดือน ทั้งนี้ หากอุปกรณ์ไม่เพียงพอ สามารถติดต่อขอรับเพิ่มเติมได้</p><p class="note">กรุณาตอบเฉพาะคำถามที่ปรากฏตามเงื่อนไขของท่าน ข้อมูลที่มีเครื่องหมาย “ไม่บังคับ” สามารถข้ามได้</p>
 <label class="inline-check"><input type="checkbox" id="ackStart">ข้าพเจ้าได้รับทราบประกาศความเป็นส่วนตัวแล้ว</label><div id="err0" class="error" role="alert"></div><div class="actions"><button type="button" onclick="advance(0)">เริ่มกรอกแบบฟอร์ม →</button></div></section>
 <section id="s1" class="hidden"><div class="step">ขั้นที่ 2 จาก 7 · ส่วนที่ 1</div><h2>ประวัติการรับ Care Pack</h2><div class="field"><strong>1.1 ท่านเคยได้รับ CHEERS Care Pack มาก่อนหรือไม่? <span class="required">*</span></strong><div class="choices" id="prevChoices"></div></div><div id="prevFollow" class="sub hidden"><div class="field"><strong>1.2 อุปกรณ์ที่ได้รับครั้งล่าสุดเพียงพอต่อการใช้งานหรือไม่? <span class="required">*</span></strong><div class="choices" id="adequacyChoices"></div></div><div class="field" id="reasonBox"><strong>1.3 หากไม่เพียงพอ เป็นเพราะเหตุใด? (เลือกได้มากกว่า 1 ข้อ)</strong><div class="choices" id="reasonChoices"></div><input type="text" id="reasonOther" placeholder="อื่น ๆ โปรดระบุ" class="hidden" style="margin-top:9px"></div></div><div id="err1" class="error" role="alert"></div><div class="actions"><button type="button" class="secondary" onclick="show(0)">← ย้อนกลับ</button><button type="button" onclick="advance(1)">ถัดไป →</button></div></section>
-<section id="s2" class="hidden"><div class="step">ขั้นที่ 3 จาก 7 · ส่วนที่ 2</div><h2>ข้อมูลเบื้องต้น (กรอกครั้งแรก)</h2><p class="note">เวอร์ชันทดสอบนี้ยังไม่เชื่อม LINE จึงแสดงข้อมูลเบื้องต้นทุกครั้ง เมื่อเชื่อมระบบแล้วจะแสดงสำหรับผู้ใช้ใหม่หรือผู้ที่ยืนยันข้อมูลเดิมไม่ได้</p>
+<section id="s2" class="hidden"><div class="step">ขั้นที่ 3 จาก 7 · ส่วนที่ 2</div><h2>ข้อมูลเบื้องต้น (กรอกครั้งแรก)</h2><p class="note">เวอร์ชันทดสอบนี้เชื่อม LINE เพื่อแสดงชื่อเท่านั้น ยังไม่ดึงข้อมูลเดิมหรือบันทึกโปรไฟล์ จึงแสดงช่องข้อมูลเบื้องต้นทุกครั้ง</p>
 <div class="field"><label for="nickname">2.1 ชื่อที่สะดวกให้เรียก <span class="required">*</span></label><input id="nickname" type="text" autocomplete="off"></div><div class="field"><label for="phone">2.2 เบอร์โทรศัพท์ <span class="required">*</span></label><input id="phone" type="tel" inputmode="tel" autocomplete="off"></div>
 <div class="field"><label for="age">2.3 อายุ (ปี)</label><input id="age" type="number" min="0" max="120" step="1" inputmode="numeric"><label class="inline-check"><input type="checkbox" id="ageSkip">ไม่ประสงค์ระบุ</label></div>
 <div class="field"><strong>2.4 อัตลักษณ์ทางเพศ / เพศวิถี (ไม่บังคับตอบ)</strong><div class="choices" id="identityChoices"></div><input id="identityOther" class="hidden" type="text" placeholder="อื่น ๆ โปรดระบุ" style="margin-top:9px"></div>
@@ -67,14 +67,58 @@ function getSelectedItems() {
     quantity: Number(values[i] || 0)
   })).filter(item => Number.isSafeInteger(item.quantity) && item.quantity > 0);
 }
+// In-memory draft only. Never log, persist, or transmit this object in test mode.
 function buildCarePackRequestPreview() {
   const packType = selectedPack();
+  const previous = selected('previous');
+  const delivery = selected('delivery');
+  const isPostal = delivery === 'จัดส่งทางไปรษณีย์';
   return {
-    packType,
-    standardPackQty: packType === 'custom' ? 0 : Number(el('standardQty').value),
-    selectedItems: packType === 'standard' ? [] : getSelectedItems()
+    privacyAcknowledged: el('ackStart').checked,
+    history: {
+      previousCarePack: previous,
+      adequacy: previous === 'เคย' ? selected('adequacy') : '',
+      insufficientReasons: previous === 'เคย' && selected('adequacy') === 'ไม่เพียงพอ' ? checked('reason') : [],
+      otherReason: previous === 'เคย' && selected('adequacy') === 'ไม่เพียงพอ' && checked('reason').includes('อื่น ๆ') ? el('reasonOther').value.trim() : ''
+    },
+    profile: {
+      nickname: el('nickname').value.trim(),
+      phone: el('phone').value.trim(),
+      age: el('ageSkip').checked || el('age').value === '' ? null : Number(el('age').value),
+      ageDeclined: el('ageSkip').checked,
+      identity: selected('identity'),
+      identityOther: selected('identity') === 'อื่น ๆ' ? el('identityOther').value.trim() : '',
+      province: el('province').value,
+      nationality: selected('nationality'),
+      nationalityOther: selected('nationality') === 'อื่น ๆ' ? el('nationalityOther').value.trim() : ''
+    },
+    carePack: {
+      packType,
+      standardPackQty: packType === 'custom' ? 0 : Number(el('standardQty').value),
+      selectedItems: packType === 'standard' ? [] : getSelectedItems()
+    },
+    delivery: {
+      method: isPostal ? 'postal' : 'pickup',
+      pickupSite: isPostal ? '' : el('pickupSite').value,
+      shipping: isPostal ? {
+        recipientName: el('shipName').value.trim(),
+        phone: el('shipPhone').value.trim(),
+        addressLine1: el('addr1').value.trim(),
+        addressLine2: el('addr2').value.trim(),
+        subdistrict: el('subdistrict').value.trim(),
+        district: el('district').value.trim(),
+        province: el('shipProvince').value,
+        postalCode: el('postcode').value.trim()
+      } : null
+    },
+    review: {
+      itemsChecked: el('checkItems').checked,
+      deliveryChecked: el('checkDelivery').checked,
+      finalAcknowledged: el('ackFinal').checked
+    }
   };
 }
+
 const values=Array(items.length).fill('');const el=id=>document.getElementById(id);const selectedPack=()=>document.querySelector('input[name="pack"]:checked').value;
 function show(i){for(let j=0;j<=7;j++)el('s'+j).classList.toggle('hidden',j!==i);window.scrollTo(0,0)}
 function choice(container,name,labels,multi=false){const root=el(container);labels.forEach((label,i)=>{const l=document.createElement('label');const input=document.createElement('input');input.type=multi?'checkbox':'radio';input.name=name;input.value=label;input.addEventListener('change',conditional);l.append(input,document.createTextNode(label));root.append(l)})}
@@ -121,6 +165,6 @@ function validate(i){if(i===0)return el('ackStart').checked?'':'กรุณา�
 let e=required(['nickname','phone']);if(e)return e;e=validateThaiPhone('phone');if(e)return e;if(!el('ageSkip').checked&&el('age').value!==''&&(!Number.isInteger(Number(el('age').value))||Number(el('age').value)<0||Number(el('age').value)>120))return 'กรุณาระบุอายุให้ถูกต้อง';if(selected('identity')==='อื่น ๆ'&&!el('identityOther').value.trim())return 'กรุณาระบุอัตลักษณ์ทางเพศ / เพศวิถีอื่น ๆ';if(selected('nationality')==='อื่น ๆ'&&!el('nationalityOther').value.trim())return 'กรุณาระบุสัญชาติอื่น ๆ';return ''}if(i===3){if(selectedPack()!=='custom'){const q=el('standardQty').value.trim();if(!/^[1-9][0-9]*$/.test(q)||!Number.isSafeInteger(Number(q))){el('standardQty').focus();return 'กรุณาระบุจำนวนชุดมาตรฐานเป็นจำนวนเต็มตั้งแต่ 1 ชุดขึ้นไป'}}return ''}if(i===4){const e=validateItems();if(e)return e;if(!values.some(v=>Number(v)>0))return 'กรุณาเลือกอุปกรณ์อย่างน้อย 1 รายการ';return ''}if(i===5){const d=selected('delivery');if(!d)return 'กรุณาเลือกวิธีรับ Care Pack';if(d==='รับด้วยตนเอง')return required(['pickupSite']);const e=required(['shipName','shipPhone','addr1','subdistrict','district','shipProvince','postcode']);
 if(e)return e;const phoneError=validateThaiPhone('shipPhone');if(phoneError)return phoneError;if(!/^\d{5}$/.test(el('postcode').value.trim()))return 'กรุณากรอกรหัสไปรษณีย์ 5 หลัก';return ''}if(i===6)return el('checkItems').checked&&el('checkDelivery').checked&&el('ackFinal').checked?'':'กรุณาตรวจสอบข้อมูลและรับทราบรายละเอียดก่อนจบการทดสอบ';return ''}
 function summary(){const p=selectedPack();const label={standard:'ชุดมาตรฐาน',custom:'เลือกอุปกรณ์เอง',standard_extra:'ชุดมาตรฐาน + อุปกรณ์เพิ่มเติม'}[p];let lines=['รูปแบบ: '+label,'ประวัติการรับ Care Pack: '+selected('previous')];if(selected('previous')==='เคย')lines.push('ความเพียงพอ: '+selected('adequacy'));lines.push('ชื่อที่สะดวกให้เรียก: '+el('nickname').value,'อายุ: '+(el('ageSkip').checked?'ไม่ประสงค์ระบุ':el('age').value||'ไม่ได้ระบุ'),'จังหวัด: '+(el('province').value||'ไม่ได้ระบุ'));if(p!=='custom')lines.push('','จำนวนชุดมาตรฐาน: '+el('standardQty').value+' ชุด','รายการในชุดมาตรฐาน: 12 รายการตามที่แสดงในหน้าเลือกรูปแบบ');if(p!=='standard'){const selectedItems=getSelectedItems();const chosen=selectedItems.map(x=>({name:items.find(item=>item.itemCode===x.itemCode).name,n:x.quantity}));lines.push('',p==='custom'?'อุปกรณ์ที่เลือก:':'อุปกรณ์เพิ่มเติม:',...(chosen.length?chosen.map(x=>'• '+x.name+' — '+x.n):['ยังไม่ได้เลือกอุปกรณ์']))}const d=selected('delivery');lines.push('','วิธีรับ: '+d);if(d==='รับด้วยตนเอง')lines.push('สถานที่รับ: '+el('pickupSite').selectedOptions[0].text,'ที่อยู่: '+pickupAddresses[el('pickupSite').value]);else lines.push('จังหวัดจัดส่ง: '+el('shipProvince').value,'หมายเหตุ: ข้อมูลที่อยู่และเบอร์โทรไม่แสดงในหน้าสรุปทดสอบ');el('summary').textContent=lines.join('\n')}
-function advance(i){const error=validate(i);const errorEl=el('err'+i);if(error){if(errorEl)errorEl.textContent=error;return}if(errorEl)errorEl.textContent='';if(i===3){if(selectedPack()==='standard'){show(5)}else{renderItems();show(4)}return}if(i===5)summary();show(i+1)}
+function advance(i){const error=validate(i);const errorEl=el('err'+i);if(error){if(errorEl)errorEl.textContent=error;return}if(errorEl)errorEl.textContent='';if(i===3){if(selectedPack()==='standard'){show(5)}else{renderItems();show(4)}return}if(i===5)summary();if(i===6){const draft=buildCarePackRequestPreview();if(!draft.review.finalAcknowledged||!draft.review.itemsChecked||!draft.review.deliveryChecked){throw new Error('Incomplete review');}/* Draft is intentionally not stored, logged, or sent. */}show(i+1)}
 renderDetails();conditional();
 </script></body></html>
