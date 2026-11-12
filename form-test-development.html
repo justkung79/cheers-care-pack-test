@@ -34,19 +34,63 @@
 // DEVELOPMENT ONLY. Enter deployment URL before testing; use fictitious data.
 const LIFF_ID = '2012323818-iQS10bKO';
 const BACKEND_EXEC_URL = 'https://script.google.com/macros/s/AKfycbz-j0e1AQt7u4KfFWh4MhXfdcNsFO0mxoKens_TxO5irfGFc-x_hdZFLrHIEL_2ly8/exec';
+// Read only the JWT expiry claim locally. This does not validate the signature;
+// the backend remains responsible for validating the token with LINE.
+function getLineIdTokenStatus() {
+  if (typeof liff === 'undefined' || !liff.isLoggedIn()) return {ok:false, reason:'LOGIN'};
+  const token = liff.getIDToken();
+  if (!token) return {ok:false, reason:'MISSING'};
+  try {
+    const encoded = token.split('.')[1];
+    if (!encoded) return {ok:false, reason:'INVALID'};
+    const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    const claims = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')));
+    if (typeof claims.exp !== 'number' || !Number.isFinite(claims.exp)) {
+      return {ok:false, reason:'INVALID'};
+    }
+    // Allow at least two minutes before expiry for the request to complete.
+    if (claims.exp * 1000 <= Date.now() + 120000) return {ok:false, reason:'EXPIRED'};
+    return {ok:true, token};
+  } catch (_) {
+    return {ok:false, reason:'INVALID'};
+  }
+}
+function showLineLoginAction(message) {
+  const status = document.getElementById('liffConnectionStatus');
+  status.replaceChildren();
+  const text = document.createElement('div');
+  text.textContent = message;
+  status.appendChild(text);
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = 'เข้าสู่ระบบ LINE ใหม่';
+  button.style.marginTop = '10px';
+  button.addEventListener('click', () => {
+    // A login redirect may reload this page and clear unsent form entries.
+    // Do not store sensitive Care Pack answers or tokens in browser storage.
+    if (!window.confirm('การเข้าสู่ระบบใหม่อาจทำให้ข้อมูลที่กรอกไว้หายไป กรุณายืนยันเพื่อดำเนินการต่อ')) return;
+    if (typeof liff === 'undefined') return;
+    try {
+      if (liff.isLoggedIn()) liff.logout();
+      liff.login({redirectUri:window.location.href.split('#')[0]});
+    } catch (_) {
+      status.firstChild.textContent = 'กรุณาปิดหน้านี้ แล้วเปิด CHEERS Care Pack ผ่าน LINE อีกครั้ง';
+    }
+  });
+  status.appendChild(button);
+}
 async function initializeCarePackLIFF() {
   const status = document.getElementById('liffConnectionStatus');
   try {
     if (typeof liff === 'undefined') throw new Error('ไม่สามารถโหลด LINE LIFF SDK ได้');
     await liff.init({ liffId: LIFF_ID });
     if (!liff.isLoggedIn()) {
-      status.textContent = 'ยังไม่ได้เข้าสู่ระบบ LINE — เปิดหน้านี้ผ่าน CHEERS LINE OA เพื่อทดสอบ หรือกดปุ่มเข้าสู่ระบบ';
-      const loginButton = document.createElement('button');
-      loginButton.type = 'button';
-      loginButton.textContent = 'เข้าสู่ระบบ LINE';
-      loginButton.style.marginTop = '10px';
-      loginButton.addEventListener('click', () => liff.login({ redirectUri: window.location.href.split('#')[0] }));
-      status.append(document.createElement('div'), loginButton);
+      showLineLoginAction('ยังไม่ได้เข้าสู่ระบบ LINE กรุณาเข้าสู่ระบบก่อนส่งคำขอ');
+      return;
+    }
+    const tokenStatus = getLineIdTokenStatus();
+    if (!tokenStatus.ok) {
+      showLineLoginAction('เซสชัน LINE หมดอายุหรือไม่พร้อมใช้งาน กรุณาเข้าสู่ระบบใหม่ก่อนส่งคำขอ');
       return;
     }
     const profile = await liff.getProfile();
@@ -158,8 +202,11 @@ async function submitCarePack() {
   if (!BACKEND_EXEC_URL.startsWith('https://script.google.com/macros/s/') || !BACKEND_EXEC_URL.endsWith('/exec')) {
     el('err6').textContent='ยังไม่ได้ตั้งค่า Development Web App URL';return;
   }
-  if (typeof liff==='undefined' || !liff.isLoggedIn() || !liff.getIDToken()) {
-    el('err6').textContent='กรุณาเข้าสู่ระบบ LINE และอนุญาต openid ก่อนส่งคำขอ';return;
+  const tokenStatus = getLineIdTokenStatus();
+  if (!tokenStatus.ok) {
+    el('err6').textContent='เซสชัน LINE หมดอายุหรือไม่พร้อมใช้งาน ยังไม่ได้ส่งคำขอ กรุณาเข้าสู่ระบบใหม่';
+    showLineLoginAction('กรุณาเข้าสู่ระบบ LINE ใหม่ก่อนส่งคำขอ');
+    return;
   }
   if (!carePackSubmissionId) carePackSubmissionId=crypto.randomUUID();
   sendingCarePack=true;
@@ -174,13 +221,21 @@ async function submitCarePack() {
   form.style.display='none';
   const add=(k,v)=>{const x=document.createElement('input');x.name=k;x.value=v;form.appendChild(x);};
   add('action','submit');add('nonce',nonce);add('origin',location.origin);
-  add('idToken',liff.getIDToken());add('form',JSON.stringify(fullCarePackPayload()));
+  add('idToken',tokenStatus.token);add('form',JSON.stringify(fullCarePackPayload()));
   let finished=false;
   const cleanup=()=>{window.removeEventListener('message',onMessage);form.remove();frame.remove();};
   const finish=(result)=>{if(finished)return;finished=true;cleanup();sendingCarePack=false;
     el('submitCarePack').disabled=false;
     if(result&&result.success){el('resultText').textContent='Request ID: '+result.requestId+' (Development)';show(7);}
-    else el('err6').textContent='ไม่สามารถยืนยันผลการบันทึกได้ กรุณาติดต่อทีมงานก่อนเริ่มคำขอใหม่';};
+    else {
+      const code = String(result && result.errorCode || '');
+      if (/^AUTH_/.test(code)) {
+        el('err6').textContent='LINE ไม่ยอมรับเซสชันปัจจุบัน ('+code+') กรุณาตรวจสอบ Requests ก่อนเข้าสู่ระบบใหม่และส่งคำขออีกครั้ง';
+        showLineLoginAction('LINE ไม่ยอมรับการยืนยันตัวตน กรุณาเข้าสู่ระบบใหม่');
+      } else {
+        el('err6').textContent='ไม่สามารถยืนยันผลการบันทึกได้ กรุณาติดต่อทีมงานก่อนเริ่มคำขอใหม่';
+      }
+    }};
   const onMessage=(event)=>{
     // Google Apps Script HTML Service may deliver from googleusercontent.com.
     if (!/^https:\/\/([a-z0-9-]+\.)*googleusercontent\.com$/i.test(event.origin) &&
@@ -193,11 +248,10 @@ async function submitCarePack() {
   document.body.appendChild(frame);document.body.appendChild(form);
   form.submit();
   // A timeout is deliberately not treated as a failed save. Retry with same ID.
-  setTimeout(()=>{if(!finished){cleanup();sendingCarePack=false;
+  setTimeout(()=>{if(!finished){finished=true;cleanup();sendingCarePack=false;
     el('submitCarePack').disabled=false;
     el('err6').textContent='ยังไม่ได้รับการยืนยัน อาจบันทึกแล้ว กรุณาติดต่อทีมงานก่อนส่งใหม่';}},30000);
 }
 
 renderDetails();conditional();
 </script></body></html>
-
